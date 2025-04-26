@@ -1,0 +1,43 @@
+plugins {
+    id 'java'
+    id 'fabric-loom' version '1.9.2'
+    id 'maven-publish'
+}
+
+group = project.maven_group
+version = project.mod_version
+archivesBaseName = "CobblemonBadRelease"
+
+repositories {
+    maven { url "https://maven.fabricmc.net" }
+    maven { url "https://repo.spongepowered.org/maven" }
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+dependencies {
+    compileOnly "org.spongepowered:mixin:0.8.6"
+    annotationProcessor "org.spongepowered:mixin:0.8.6:processor"
+
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+
+    compileOnly files('libs/Cobblemon-fabric-1.6.1+1.21.1.jar')
+    mappings  "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+
+    compileOnly "net.fabricmc:fabric-loader:${project.loader_version}"
+
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-screen-api-v1:2.0.25+8b68f1c719"
+    modImplementation "net.fabricmc.fabric-api:fabric-key-binding-api-v1:1.0.7+1.21.1"
+}
+
+loom {
+    mixin {
+        defaultRefmapName = "cobblemonpc.refmap.json"
+    }
+}
