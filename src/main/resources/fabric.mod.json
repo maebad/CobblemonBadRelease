@@ -1,29 +1,14 @@
 {
-    "schemaVersion": 1,
-    "id": "cobblemon-pc-mod",
-    "version": "${version}",
-    "name": "Cobblemon PC Keybind Mod",
-    "description": "Adds right-click quick release to the Cobblemon PC.",
-    "authors": [
-        "YourName"
-    ],
-    "contact": {},
-    "license": "MIT",
-    "icon": "assets/cobblemonpc/icon.png",
-    "environment": "*",
-    "mixins": [],
-    "depends": {
-        "fabricloader": ">=0.16.10",
-        "minecraft": "1.21.1",
-        "fabric-api": "*",
-        "cobblemon": "*"
-    },
-    "custom": {
-        "loom:generated": true
-    },
-    "entrypoints": {
-        "client": [
-            "com.maebad.cobblemonpc.CobblemonPcClient"
-        ]
-    }
+  "schemaVersion": 1,
+  "id": "cobblemonpcmod",
+  "version": "${version}",
+  "entrypoints": {
+    "client": [
+      "com.maebad.cobblemonpcmod.CobblemonPCModClient"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.14.9",
+    "fabric": "*"
+  }
 }
