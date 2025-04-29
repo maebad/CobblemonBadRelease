@@ -95,7 +95,7 @@ public class CobblemonPCModClient implements ClientModInitializer {
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int textWidth = mc.font.width(message);
         int x = (screenWidth - textWidth) / 2;
-        int y = 30;
+        int y = 10;
         gui.drawString(mc.font, message, x, y, 0xFFFF00, false);
     }
 }
