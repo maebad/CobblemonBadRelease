@@ -1,4 +1,4 @@
-CobblemonBadRelease v1.1.3
+CobblemonBadRelease (Mod Cobblemon 1.6.1 Fabric 1.21.1)
 
 Changelog :
 • Ajout d'un fichier config pour le mod.
