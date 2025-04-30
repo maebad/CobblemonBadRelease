@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "id": "cobblemonpcmod",
+  "id": "cobblemonbadrelease",
   "version": "${version}",
   "entrypoints": {
     "client": [
-      "com.maebad.cobblemonpcmod.CobblemonPCModClient"
+      "com.maebad.cobblemonbadrelease.CobblemonBadReleaseModClient"
     ]
   },
   "depends": {

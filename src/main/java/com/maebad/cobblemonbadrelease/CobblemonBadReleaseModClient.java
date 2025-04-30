@@ -1,4 +1,4 @@
-package com.maebad.cobblemonpcmod;
+package com.maebad.cobblemonbadrelease;
 
 import com.cobblemon.mod.common.CobblemonNetwork;
 import com.cobblemon.mod.common.api.storage.pc.PCPosition;
@@ -11,30 +11,47 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import com.mojang.blaze3d.platform.InputConstants;
 import org.lwjgl.glfw.GLFW;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Properties;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
 /**
- * Client-side initializer for the CobblemonPCMod.
- * Adds release-on-right-click functionality and a toggle overlay.
+ * Client-side initializer for the CobblemonBadReleaseMod.
+ * Adds release-on-right-click functionality, toggle overlay,
+ * and persistence of toggle state in config.
  */
-public class CobblemonPCModClient implements ClientModInitializer {
+public class CobblemonBadReleaseModClient implements ClientModInitializer {
 
     // ----- Ajouts pour le toggle sur H -----
     private static KeyMapping toggleKey;
     public static boolean modEnabled = true;
     // ----------------------------------------
 
+    // Emplacement du fichier de config dans config/cobblemonpcmod.properties
+    private static final Path CONFIG_PATH = FabricLoader.getInstance()
+            .getConfigDir()
+            .resolve("cobblemonpcmod.properties");
+
     @Override
     public void onInitializeClient() {
-        // Existing: registration du GUI PC release-on-right-click
+        // Charger la config dès le démarrage
+        loadConfig();
+
+        // Registration du GUI PC release-on-right-click
         ScreenEvents.BEFORE_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
             if (screen instanceof PCGUI pcScreen) {
                 ScreenMouseEvents.beforeMouseClick(pcScreen).register((s, mouseX, mouseY, button) -> {
@@ -56,19 +73,16 @@ public class CobblemonPCModClient implements ClientModInitializer {
 
                             ReleasePCPokemonPacket pkt = new ReleasePCPokemonPacket(id, pos);
                             CobblemonNetwork.INSTANCE.sendToServer(pkt);
-                            // —————— Annulation de la sélection pour éviter le second clic ——————
-                            try {
-                            // 1) Réinitialise la sélection
-                            Method reset = storageWidget.getClass()
-                            .getDeclaredMethod("resetSelected");
-                            reset.setAccessible(true);
-                            reset.invoke(storageWidget);
 
-                            // 2) Désactive l'affichage de la boîte de confirmation de relâche
-                            Method setConfirm = storageWidget.getClass()
-                            .getDeclaredMethod("setDisplayConfirmRelease", boolean.class);
-                            setConfirm.setAccessible(true);
-                            setConfirm.invoke(storageWidget, false);
+                            // Reset selection & hide confirm dialog
+                            try {
+                                Method reset = storageWidget.getClass().getDeclaredMethod("resetSelected");
+                                reset.setAccessible(true);
+                                reset.invoke(storageWidget);
+
+                                Method setConfirm = storageWidget.getClass().getDeclaredMethod("setDisplayConfirmRelease", boolean.class);
+                                setConfirm.setAccessible(true);
+                                setConfirm.invoke(storageWidget, false);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -80,31 +94,60 @@ public class CobblemonPCModClient implements ClientModInitializer {
             }
         });
 
-        // --- Début injection: Toggle activation/désactivation ---
+        // --- Toggle activation/désactivation ---
         toggleKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
-            "key.cobblemonpcmod.toggle",        // Clé de traduction
-            InputConstants.Type.KEYSYM,            // Type clavier
-            GLFW.GLFW_KEY_H,                      // Touche H
-            "category.cobblemonpcmod.main"      // Catégorie
+                "key.cobblemonpcmod.toggle",
+                InputConstants.Type.KEYSYM,
+                GLFW.GLFW_KEY_H,
+                "category.cobblemonpcmod.main"
         ));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (toggleKey.consumeClick()) {
                 modEnabled = !modEnabled;
+                saveConfig();
+                if (client.player != null) {
+                    client.player.displayClientMessage(
+                        Component.literal("CobblemonBadRelease " + (modEnabled ? "activé" : "désactivé")),
+                        false
+                    );
+                }
             }
         });
 
+        // Overlay HUD
         HudRenderCallback.EVENT.register((gui, tickDelta) -> {
-            if (modEnabled) {
-                drawCenteredText(gui);
-            }
+            if (modEnabled) drawCenteredText(gui);
         });
-        // --- Fin injection ---
     }
 
-    /**
-     * Dessine le texte "CobblemonPCMod activé" centré en haut de l'écran en jaune.
-     */
+    // --- Config methods ---
+    private static void loadConfig() {
+        Properties props = new Properties();
+        if (Files.exists(CONFIG_PATH)) {
+            try (InputStream in = Files.newInputStream(CONFIG_PATH)) {
+                props.load(in);
+                modEnabled = Boolean.parseBoolean(props.getProperty("modEnabled", Boolean.toString(modEnabled)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static void saveConfig() {
+        Properties props = new Properties();
+        props.setProperty("modEnabled", Boolean.toString(modEnabled));
+        try {
+            Files.createDirectories(CONFIG_PATH.getParent());
+            try (OutputStream out = Files.newOutputStream(CONFIG_PATH)) {
+                props.store(out, "Configuration de CobblemonBadReleaseMod");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // --- HUD text ---
     private void drawCenteredText(GuiGraphics gui) {
         Minecraft mc = Minecraft.getInstance();
         String message = "CobblemonBadRelease activé (H pour désactiver)";
