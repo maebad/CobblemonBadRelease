@@ -56,6 +56,22 @@ public class CobblemonPCModClient implements ClientModInitializer {
 
                             ReleasePCPokemonPacket pkt = new ReleasePCPokemonPacket(id, pos);
                             CobblemonNetwork.INSTANCE.sendToServer(pkt);
+                            // —————— Annulation de la sélection pour éviter le second clic ——————
+                            try {
+                            // 1) Réinitialise la sélection
+                            Method reset = storageWidget.getClass()
+                            .getDeclaredMethod("resetSelected");
+                            reset.setAccessible(true);
+                            reset.invoke(storageWidget);
+
+                            // 2) Désactive l'affichage de la boîte de confirmation de relâche
+                            Method setConfirm = storageWidget.getClass()
+                            .getDeclaredMethod("setDisplayConfirmRelease", boolean.class);
+                            setConfirm.setAccessible(true);
+                            setConfirm.invoke(storageWidget, false);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
