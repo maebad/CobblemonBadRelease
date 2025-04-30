@@ -107,7 +107,7 @@ public class CobblemonPCModClient implements ClientModInitializer {
      */
     private void drawCenteredText(GuiGraphics gui) {
         Minecraft mc = Minecraft.getInstance();
-        String message = "CobblemonPCMod activé (H)";
+        String message = "CobblemonBadRelease activé (H pour désactiver)";
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int textWidth = mc.font.width(message);
         int x = (screenWidth - textWidth) / 2;
