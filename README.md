@@ -1,6 +1,5 @@
 CobblemonBadRelease (Mod Cobblemon 1.6.1 Fabric 1.21.1)  
   
-Changelog :  
 • Dans le PC : Clic gauche → clic droit = release instantané.  
 • Le mod est actif uniquement si un message en jaune en haut de l'écran le précise, pour plus de sécurité.  
 • Touche H pour activer/désactiver le mod en dehors de l'interface PC.  
